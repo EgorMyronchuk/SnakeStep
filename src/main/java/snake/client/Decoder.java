@@ -14,6 +14,9 @@ public class Decoder {
         switch ()
     }
     public int twoPointToDirection (Point curr , Point next) {
+        int deltaX = curr.getX() - next.getX();
+        int deltaY = curr.getY() - next.getY();
+        if (deltaX )
 
     }
 
