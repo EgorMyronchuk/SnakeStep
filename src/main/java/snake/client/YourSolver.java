@@ -5,21 +5,38 @@ import com.codenjoy.dojo.client.WebSocketRunner;
 import com.codenjoy.dojo.services.Direction;
 import com.codenjoy.dojo.services.Point;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static snake.client.Decoder.PathChecker;
+import static snake.client.Decoder.getDirection;
 
 public class YourSolver implements Solver<Board> {
-
+    Algo1 algo = new Algo1(15 , 15);
     Direction doSolve(Board board) {
-        List<Point> barriers = board.getBarriers();
-        List<Point> walls = board.getWalls();
-        List<Point> snake = board.getSnake();
-        Point apple = board.getApples().get(0);
-        Point head = board.getHead();
+        System.out.println(PathChecker + " TEEEEEEEEESSSSSTTTT");
+        if(PathChecker.size() > 1 || PathChecker == null){
+            return getDirection();
+        }
+        else {
+            Set<Point> obstaclesToPath = new HashSet<>(board.getBarriers());
+            Set<Point> allApples = new HashSet<>(board.getApples());
+            Optional<Iterable<Point>> result = algo.trace(board.getHead(),allApples,obstaclesToPath) ;
+            if(result.isPresent()){
+                PathChecker.clear();
+                for (Point p : result.get()) {
+                    PathChecker.add(p);
+                }
+                System.out.println(PathChecker + " TEEEEEEEEESSSSSTTTT");
+            }
+            else {
+                return Direction.UP;
+            }
 
-        if      (apple.getX() < head.getX()) return Direction.LEFT;
-        else if (apple.getX() > head.getX()) return Direction.RIGHT;
-        else if (apple.getY() > head.getY()) return Direction.UP;
-        else  return Direction.DOWN;
+            return getDirection();
+        }
     }
 
     @Override
