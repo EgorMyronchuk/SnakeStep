@@ -14,29 +14,13 @@ import static snake.client.Decoder.PathChecker;
 import static snake.client.Decoder.getDirection;
 
 public class YourSolver implements Solver<Board> {
+    Board board = new Board();
     Algo1 algo = new Algo1(15 , 15);
+    Algo2 algo2 = new Algo2(15 , 15 , board);
     Direction doSolve(Board board) {
-        System.out.println(PathChecker + " TEEEEEEEEESSSSSTTTT");
-        if(PathChecker.size() > 1 || PathChecker == null){
-            return getDirection();
-        }
-        else {
-            Set<Point> obstaclesToPath = new HashSet<>(board.getBarriers());
-            Set<Point> allApples = new HashSet<>(board.getApples());
-            Optional<Iterable<Point>> result = algo.trace(board.getHead(),allApples,obstaclesToPath) ;
-            if(result.isPresent()){
-                PathChecker.clear();
-                for (Point p : result.get()) {
-                    PathChecker.add(p);
-                }
-                System.out.println(PathChecker + " TEEEEEEEEESSSSSTTTT");
-            }
-            else {
-                return Direction.UP;
-            }
-
-            return getDirection();
-        }
+        Set<Point> applesSet = new HashSet<>(board.getApples());
+        Set<Point> barriersSet = new HashSet<>(board.getBarriers());
+        return getDirection(algo2.trace(board.getHead(), applesSet , barriersSet , board.getSnake() ));
     }
 
     @Override

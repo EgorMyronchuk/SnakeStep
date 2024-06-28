@@ -8,11 +8,10 @@ import java.util.*;
 public class Decoder {
     static List<Point> PathChecker = new ArrayList<Point>();
 
-    public static Direction getDirection() {
-        int deltaX = PathChecker.getFirst().getX() - PathChecker.get(1).getX();
-        int deltaY = PathChecker.getFirst().getY() - PathChecker.get(1).getY();
+    public static Direction getDirection(Point start , Point target) {
+        int deltaX = start.getX() - target.getX();
+        int deltaY = start.getY() - target.getY();
         String direction = deltaX + "," + deltaY;
-        PathChecker.removeFirst(); // add handel if size = 1 need new
         System.out.println("getDirection: " + direction);
         return switch (direction) {
             case "0,1" -> Direction.DOWN;
@@ -22,6 +21,28 @@ public class Decoder {
             default -> throw new IllegalArgumentException("Invalid points for direction");
         };
     }
-
+    public static Direction getDirection(Optional<Iterable<Point>> points) {
+        if (points.isPresent()) {
+            Iterator<Point> iterator = points.get().iterator();
+            if (iterator.hasNext()) {
+                Point firstPoint = iterator.next();
+                if (iterator.hasNext()) {
+                    Point secondPoint = iterator.next();
+                    return getDirection(firstPoint, secondPoint);
+                } else {
+                    throw new IllegalArgumentException("Not enough points for direction");
+                }
+            } else {
+                throw new IllegalArgumentException("Not enough points for direction");
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid points for direction");
+        }
+    }
+    public static Direction getDirection() {
+        Direction result = getDirection (PathChecker.getFirst() , PathChecker.get(1));
+        PathChecker.removeFirst();
+        return result;
+    }
 
 }

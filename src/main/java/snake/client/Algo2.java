@@ -4,6 +4,7 @@ import com.codenjoy.dojo.services.Point;
 import com.codenjoy.dojo.services.PointImpl;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -11,26 +12,28 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class Algo1 {
+public class Algo2 {
     private static final int EMPTY = 0;
     private static final int START = 1;
     private static final int OBSTACLE = -10;
     private final int width;
     private final int height;
-    private final int[][] board;
+    private final int[][] lockalBoard;
+    private Board board;
 
-    public Algo1(int width, int height) {
+    public Algo2(int width, int height , Board board) {
         this.width = width;
         this.height = height;
-        this.board = new int[height][width];
+        this.lockalBoard = new int[height][width];
+        this.board = board;
     }
 
     private int get(int x, int y) {
-        return board[y][x];
+        return lockalBoard[y][x];
     }
 
     private void set(int x, int y, int value) {
-        board[y][x] = value;
+        lockalBoard[y][x] = value;
     }
 
     private int get(Point p) {
@@ -65,10 +68,13 @@ public class Algo1 {
                 .filter(this::isOnBoard);
     }
 
-    private Stream<Point> neighboursUnvisited(Point p) {
+    private Stream<Point> neighboursUnvisited(Point p, List<Point> snakePosition, int steps) {
+        Point futureTail = snakePosition.size() > steps ? snakePosition.get(snakePosition.size() - steps) : null;
         return neighbours(p)
-                .filter(this::isUnvisited);
+                .filter(np -> isUnvisited(np) || (futureTail != null && np.equals(futureTail)));
     }
+
+
 
     private Stream<Point> neighboursByValue(Point pt, int value) {
         return neighbours(pt)
@@ -83,10 +89,18 @@ public class Algo1 {
         );
         obstacles.forEach(p -> set(p, OBSTACLE));
     }
-    public Optional<Iterable<Point>> trace(Point src, Set<Point> dstSet, Set<Point> obstacles) {
+    private void stepChangesOnBoard (List<Point> snakePosition) {
+        if (snakePosition.size() > 1) {
+            set(snakePosition.getLast(), EMPTY);
+            snakePosition.removeLast();
+            System.out.println("Snake Board :" + snakePosition);
+        }
+    }
+
+    public Optional<Iterable<Point>> trace(Point src, Set<Point> dstSet, Set<Point> obstacles, List<Point> snakePoints) {
         initializeBoard(obstacles);
 
-        // 1. fill the board
+        // 1. Заполняем доску
         int[] counter = {START};
         set(src, counter[0]);
         counter[0]++;
@@ -94,7 +108,7 @@ public class Algo1 {
         Point closestDst = null;
         for (Set<Point> curr = Set.of(src); !(found || curr.isEmpty()); counter[0]++) {
             Set<Point> next = curr.stream()
-                    .flatMap(this::neighboursUnvisited)
+                    .flatMap(p -> neighboursUnvisited(p, snakePoints, counter[0]))
                     .collect(Collectors.toSet());
             next.forEach(p -> set(p, counter[0]));
             for (Point dst : dstSet) {
@@ -105,9 +119,11 @@ public class Algo1 {
                 }
             }
             curr = next;
+            // Симуляция движения змеи
+            stepChangesOnBoard(snakePoints);
         }
 
-        // 2. backtrack (reconstruct path)
+        // 2. Обратная трассировка (восстановление пути)
         if (!found || closestDst == null) return Optional.empty();
         LinkedList<Point> path = new LinkedList<>();
         path.add(closestDst);
@@ -117,11 +133,13 @@ public class Algo1 {
             counter[0]--;
             Point prev = neighboursByValue(curr, counter[0])
                     .findFirst()
-                    .orElseThrow(() -> new RuntimeException("impossible!"));
+                    .orElseThrow(() -> new RuntimeException("Impossible!"));
             path.addFirst(prev);
             curr = prev;
         }
         return Optional.of(path);
     }
+
+
 
 }
