@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class Algo2 {
+public class Algo3 {
     private static final int EMPTY = 0;
     private static final int START = 1;
     private static final int OBSTACLE = -10;
@@ -25,11 +25,11 @@ public class Algo2 {
     private final int[][] lockalBoard;
     private Board board;
 
-    public Algo2(int width, int height , Board board) {
+    public Algo3(int width, int height) {
         this.width = width;
         this.height = height;
         this.lockalBoard = new int[height][width];
-        this.board = board;
+
     }
 
     private int get(int x, int y) {
@@ -72,16 +72,12 @@ public class Algo2 {
                 .filter(this::isOnBoard);
     }
 
-    private Stream<Point> neighboursUnvisited(Point p, List<Point> snakePosition, int steps) {
-        Point futureTail = snakePosition.size() > steps ? snakePosition.get(snakePosition.size() - steps) : null;
+    private Stream<Point> neighboursUnvisited(Point p) {
         return neighbours(p)
-                .filter(np -> isUnvisited(np) || (futureTail != null && np.equals(futureTail)));
+                .filter(this::isUnvisited);
     }
 
-
-
     private Stream<Point> neighboursByValue(Point pt, int value) {
-        System.out.println("NeighboursByValue" + neighbours(pt).filter(p -> get(p) == value).toList().toString());
         return neighbours(pt)
                 .filter(p -> get(p) == value);
     }
@@ -94,14 +90,9 @@ public class Algo2 {
         );
         obstacles.forEach(p -> set(p, OBSTACLE));
     }
-    private void stepChangesOnBoard (List<Point> snakePosition) {
-        if (snakePosition.size() > 1) {
-            set(snakePosition.getLast(), EMPTY);
-            snakePosition.removeLast();
-        }
-    }
 
-    public Optional<Iterable<Point>> trace(Point src, Set<Point> dstSet, Set<Point> obstacles, List<Point> snakePoints) {
+
+    public Optional<Iterable<Point>> trace(Point src, Set<Point> dstSet, Set<Point> obstacles) {
         initializeBoard(obstacles);
 
         // 1. Заполняем доску
@@ -112,7 +103,7 @@ public class Algo2 {
         Point closestDst = null;
         for (Set<Point> curr = Set.of(src); !(found || curr.isEmpty()); counter[0]++) {
             Set<Point> next = curr.stream()
-                    .flatMap(p -> neighboursUnvisited(p, snakePoints, counter[0]))
+                    .flatMap(this::neighboursUnvisited)
                     .collect(Collectors.toSet());
             next.forEach(p -> set(p, counter[0]));
             for (Point dst : dstSet) {
@@ -124,7 +115,6 @@ public class Algo2 {
             }
             curr = next;
 
-            stepChangesOnBoard(snakePoints);
         }
 
         // 2. Обратная трассировка (восстановление пути)

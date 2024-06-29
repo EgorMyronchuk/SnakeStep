@@ -17,10 +17,24 @@ public class YourSolver implements Solver<Board> {
     Board board = new Board();
     Algo1 algo = new Algo1(15 , 15);
     Algo2 algo2 = new Algo2(15 , 15 , board);
+    Algo3 algo3 = new Algo3(15 , 15);
     Direction doSolve(Board board) {
-        Set<Point> applesSet = new HashSet<>(board.getApples());
-        Set<Point> barriersSet = new HashSet<>(board.getBarriers());
-        return getDirection(algo2.trace(board.getHead(), applesSet , barriersSet , board.getSnake() ));
+        Set<Point> obstaclesToPath = new HashSet<>();
+        obstaclesToPath.addAll(board.getStones());
+        obstaclesToPath.addAll(board.getWalls());
+        if(board.getSnake().size() > 1 ) {
+            List<Point> snake = board.getSnake();
+            snake.removeLast();
+            obstaclesToPath.addAll(snake);
+        }
+        Set<Point> allApples = new HashSet<>(board.getApples());
+        Optional<Iterable<Point>> result = algo3.trace(board.getHead() , allApples , obstaclesToPath);
+
+        System.out.println(result);
+        System.out.println();
+        System.out.println(algo3);
+        System.out.println();
+       return getDirection(result);
     }
 
     @Override
