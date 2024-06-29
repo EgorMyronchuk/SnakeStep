@@ -14,16 +14,15 @@ import static snake.client.Decoder.PathChecker;
 import static snake.client.Decoder.getDirection;
 
 public class YourSolver implements Solver<Board> {
-    Board board = new Board();
     Algo1 algo = new Algo1(15 , 15);
+    Algo2Changes algo2 = new Algo2Changes(15,15);
     Direction doSolve(Board board) {
         Set<Point> obstaclesToPath = new HashSet<>(board.getBarriers());
         Set<Point> allApples = new HashSet<>(board.getApples());
-        Optional<Iterable<Point>> result = algo.trace(board.getHead() , allApples , obstaclesToPath , board.getSnake());
-        Algo2Changes
+        Optional<Iterable<Point>> result = algo2.trace(board.getHead() , allApples , obstaclesToPath , board.getSnake());
         System.out.println(result);
         System.out.println();
-        System.out.println(algo);
+        System.out.println(algo2);
         System.out.println();
        return getDirection(result);
     }

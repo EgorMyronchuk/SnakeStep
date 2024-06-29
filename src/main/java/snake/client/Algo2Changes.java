@@ -91,7 +91,7 @@ public class Algo2Changes {
 
     private void SnakeTailIvaide (List<Point> snakePosition) {
       List<Point> snakeTailClone = snakePosition;
-      if(snakeTailClone.size() > 1 || snakeTailClone != null) {
+      if(snakeTailClone.size() > 2 ) {
           set(snakeTailClone.get(1), EMPTY);
           snakeTailClone.remove(1);
       }
