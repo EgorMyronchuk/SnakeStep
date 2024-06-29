@@ -16,23 +16,14 @@ import static snake.client.Decoder.getDirection;
 public class YourSolver implements Solver<Board> {
     Board board = new Board();
     Algo1 algo = new Algo1(15 , 15);
-    Algo2 algo2 = new Algo2(15 , 15 , board);
-    Algo3 algo3 = new Algo3(15 , 15);
     Direction doSolve(Board board) {
-        Set<Point> obstaclesToPath = new HashSet<>();
-        obstaclesToPath.addAll(board.getStones());
-        obstaclesToPath.addAll(board.getWalls());
-        if(board.getSnake().size() > 1 ) {
-            List<Point> snake = board.getSnake();
-            snake.removeLast();
-            obstaclesToPath.addAll(snake);
-        }
+        Set<Point> obstaclesToPath = new HashSet<>(board.getBarriers());
         Set<Point> allApples = new HashSet<>(board.getApples());
-        Optional<Iterable<Point>> result = algo3.trace(board.getHead() , allApples , obstaclesToPath);
-
+        Optional<Iterable<Point>> result = algo.trace(board.getHead() , allApples , obstaclesToPath , board.getSnake());
+        Algo2Changes
         System.out.println(result);
         System.out.println();
-        System.out.println(algo3);
+        System.out.println(algo);
         System.out.println();
        return getDirection(result);
     }

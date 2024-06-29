@@ -16,28 +16,26 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class Algo2 {
+public class Algo2Changes {
     private static final int EMPTY = 0;
     private static final int START = 1;
     private static final int OBSTACLE = -10;
     private final int width;
     private final int height;
-    private final int[][] lockalBoard;
-    private Board board;
+    private final int[][] board;
 
-    public Algo2(int width, int height , Board board) {
+    public Algo2Changes(int width, int height) {
         this.width = width;
         this.height = height;
-        this.lockalBoard = new int[height][width];
-        this.board = board;
+        this.board = new int[height][width];
     }
 
     private int get(int x, int y) {
-        return lockalBoard[y][x];
+        return board[y][x];
     }
 
     private void set(int x, int y, int value) {
-        lockalBoard[y][x] = value;
+        board[y][x] = value;
     }
 
     private int get(Point p) {
@@ -72,16 +70,12 @@ public class Algo2 {
                 .filter(this::isOnBoard);
     }
 
-    private Stream<Point> neighboursUnvisited(Point p, List<Point> snakePosition, int steps) {
-        Point futureTail = snakePosition.size() > steps ? snakePosition.get(snakePosition.size() - steps) : null;
+    private Stream<Point> neighboursUnvisited(Point p) {
         return neighbours(p)
-                .filter(np -> isUnvisited(np) || (futureTail != null && np.equals(futureTail)));
+                .filter(this::isUnvisited);
     }
 
-
-
     private Stream<Point> neighboursByValue(Point pt, int value) {
-        System.out.println("NeighboursByValue" + neighbours(pt).filter(p -> get(p) == value).toList().toString());
         return neighbours(pt)
                 .filter(p -> get(p) == value);
     }
@@ -94,17 +88,20 @@ public class Algo2 {
         );
         obstacles.forEach(p -> set(p, OBSTACLE));
     }
-    private void stepChangesOnBoard (List<Point> snakePosition) {
-        if (snakePosition.size() > 1) {
-            set(snakePosition.getLast(), EMPTY);
-            snakePosition.removeLast();
-        }
+
+    private void SnakeTailIvaide (List<Point> snakePosition) {
+      List<Point> snakeTailClone = snakePosition;
+      if(snakeTailClone.size() > 1 || snakeTailClone != null) {
+          set(snakeTailClone.get(1), EMPTY);
+          snakeTailClone.remove(1);
+      }
     }
 
-    public Optional<Iterable<Point>> trace(Point src, Set<Point> dstSet, Set<Point> obstacles, List<Point> snakePoints) {
+
+    public Optional<Iterable<Point>> trace(Point src, Set<Point> dstSet, Set<Point> obstacles , List<Point> snakePosition) {
         initializeBoard(obstacles);
 
-        // 1. Заполняем доску
+        // 1. fill the board
         int[] counter = {START};
         set(src, counter[0]);
         counter[0]++;
@@ -112,7 +109,7 @@ public class Algo2 {
         Point closestDst = null;
         for (Set<Point> curr = Set.of(src); !(found || curr.isEmpty()); counter[0]++) {
             Set<Point> next = curr.stream()
-                    .flatMap(p -> neighboursUnvisited(p, snakePoints, counter[0]))
+                    .flatMap(this::neighboursUnvisited)
                     .collect(Collectors.toSet());
             next.forEach(p -> set(p, counter[0]));
             for (Point dst : dstSet) {
@@ -122,12 +119,13 @@ public class Algo2 {
                     break;
                 }
             }
-            curr = next;
 
-            stepChangesOnBoard(snakePoints);
+            SnakeTailIvaide(snakePosition);
+
+            curr = next;
         }
 
-        // 2. Обратная трассировка (восстановление пути)
+        // 2. backtrack (reconstruct path)
         if (!found || closestDst == null) return Optional.empty();
         LinkedList<Point> path = new LinkedList<>();
         path.add(closestDst);
@@ -137,7 +135,7 @@ public class Algo2 {
             counter[0]--;
             Point prev = neighboursByValue(curr, counter[0])
                     .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Impossible!"));
+                    .orElseThrow(() -> new RuntimeException("impossible!"));
             path.addFirst(prev);
             curr = prev;
         }
@@ -181,5 +179,4 @@ public class Algo2 {
     public String toString() {
         return boardFormatted(Set.of());
     }
-
 }

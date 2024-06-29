@@ -1,15 +1,20 @@
 package snake.client;
 
+import a09lee.colored.Ansi;
+import a09lee.colored.Attribute;
+import a09lee.colored.Colored;
 import com.codenjoy.dojo.services.Point;
 import com.codenjoy.dojo.services.PointImpl;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class Algo1 {
     private static final int EMPTY = 0;
@@ -83,7 +88,7 @@ public class Algo1 {
         );
         obstacles.forEach(p -> set(p, OBSTACLE));
     }
-    public Optional<Iterable<Point>> trace(Point src, Set<Point> dstSet, Set<Point> obstacles) {
+    public Optional<Iterable<Point>> trace(Point src, Set<Point> dstSet, Set<Point> obstacles , List<Point> SnakePositions) {
         initializeBoard(obstacles);
 
         // 1. fill the board
@@ -124,4 +129,41 @@ public class Algo1 {
         return Optional.of(path);
     }
 
+    //------------------------------------------------------------------------------------
+    String cellFormatted(Point p, Set<Point> path) {
+        int value = get(p);
+        String valueF = String.format("%3d", value);
+
+        if (value == OBSTACLE) {
+            Attribute a = new Attribute(Ansi.ColorFont.BLUE);
+            return Colored.build(" XX", a);
+        }
+
+        if (path.isEmpty()) return valueF;
+
+        if (path.contains(p)) {
+            Attribute a = new Attribute(Ansi.ColorFont.RED);
+            return Colored.build(valueF, a);
+        }
+
+        return valueF;
+    }
+
+    public String boardFormatted(Iterable<Point> path0) {
+        Set<Point> path = StreamSupport
+                .stream(path0.spliterator(), false)
+                .collect(Collectors.toSet());
+        return IntStream.range(0, height)
+                .mapToObj(y ->
+                        IntStream.range(0, width).mapToObj(x -> PointImpl.pt(x, y))
+                                .map(p -> cellFormatted(p, path))
+                                .collect(Collectors.joining())
+                )
+                .collect(Collectors.joining("\n"));
+    }
+
+    @Override
+    public String toString() {
+        return boardFormatted(Set.of());
+    }
 }
