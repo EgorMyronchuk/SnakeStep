@@ -6,10 +6,7 @@ import a09lee.colored.Colored;
 import com.codenjoy.dojo.services.Point;
 import com.codenjoy.dojo.services.PointImpl;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -89,15 +86,6 @@ public class Algo2Changes {
         obstacles.forEach(p -> set(p, OBSTACLE));
     }
 
-    private void SnakeTailIvaide (List<Point> snakePosition) {
-      List<Point> snakeTailClone = snakePosition;
-      if(snakeTailClone.size() > 2 ) {
-          set(snakeTailClone.get(1), EMPTY);
-          snakeTailClone.remove(1);
-      }
-    }
-
-
     public Optional<Iterable<Point>> trace(Point src, Set<Point> dstSet, Set<Point> obstacles , List<Point> snakePosition) {
         initializeBoard(obstacles);
 
@@ -119,8 +107,6 @@ public class Algo2Changes {
                     break;
                 }
             }
-
-            SnakeTailIvaide(snakePosition);
 
             curr = next;
         }
@@ -167,7 +153,8 @@ public class Algo2Changes {
                 .stream(path0.spliterator(), false)
                 .collect(Collectors.toSet());
         return IntStream.range(0, height)
-                .mapToObj(y ->
+                .mapToObj(y -> height - 1 - y)  // изменено для зеркалирования по вертикали
+                .map(y ->
                         IntStream.range(0, width).mapToObj(x -> PointImpl.pt(x, y))
                                 .map(p -> cellFormatted(p, path))
                                 .collect(Collectors.joining())
