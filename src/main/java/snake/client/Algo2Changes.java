@@ -86,7 +86,7 @@ public class Algo2Changes {
         obstacles.forEach(p -> set(p, OBSTACLE));
     }
 
-    public Optional<Iterable<Point>> trace(Point src, Set<Point> dstSet, Set<Point> obstacles , List<Point> snakePosition) {
+    public Optional<Iterable<Point>> trace(Point src, Set<Point> dstSet, Set<Point> obstacles) {
         initializeBoard(obstacles);
 
         // 1. fill the board

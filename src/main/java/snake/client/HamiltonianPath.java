@@ -14,8 +14,8 @@ public class HamiltonianPath {
     private final List<Point> hamiltonPath;
 
     private HamiltonianPath() {
-        this.xSize = 13;
-        this.ySize = 13;
+        this.xSize = 16;
+        this.ySize = 16;
         this.hamiltonPath = new ArrayList<>();
         createHamiltonPath();
         System.out.println("created Hamiltonian path");
@@ -32,7 +32,7 @@ public class HamiltonianPath {
     public void createHamiltonPath() {
         hamiltonPath.clear();
         hamiltonPath.add(new PointImpl(0, 0));
-        if (!hamiltonStep(hamiltonPath.get(0))) {
+        if (!hamiltonStep(new PointImpl(0, 0))) {
             throw new RuntimeException("Failed to find a Hamiltonian path");
         }
     }
@@ -68,8 +68,7 @@ public class HamiltonianPath {
 
     private boolean hamiltonStep(Point current) {
         if (hamiltonPath.size() == xSize * ySize) {
-            Point first = hamiltonPath.getFirst();
-            //System.out.println("Hamilton path step");
+            Point first = hamiltonPath.get(0);
             return (first.getX() == current.getX() && first.getY() == current.getY() - 1)
                     || (first.getX() == current.getX() && first.getY() == current.getY() + 1)
                     || (first.getX() - 1 == current.getX() && first.getY() == current.getY())
@@ -77,33 +76,32 @@ public class HamiltonianPath {
         }
 
         for (DirectionsForStep direction : DirectionsForStep.values()) {
-            //System.out.println("Direction: " + direction);
             Point newElement = switch (direction) {
                 case Up -> new PointImpl(current.getX(), current.getY() - 1);
-                case Left -> new PointImpl(current.getX() - 1, current.getY());
+                case Right -> new PointImpl(current.getX() + 1, current.getY());
                 case Down -> new PointImpl(current.getX(), current.getY() + 1);
-                case Rigth -> new PointImpl(current.getX() + 1, current.getY());
-                default -> null;
+                case Left -> new PointImpl(current.getX() - 1, current.getY());
             };
 
             if (0 <= newElement.getX() && newElement.getX() < xSize
                     && 0 <= newElement.getY() && newElement.getY() < ySize
                     && !hamiltonPath.contains(newElement)) {
                 hamiltonPath.add(newElement);
+                System.out.println("Added: " + newElement);
                 if (hamiltonStep(newElement)) {
                     return true;
                 }
                 hamiltonPath.remove(newElement);
+                System.out.println("Removed: " + newElement);
             }
         }
         return false;
     }
 
-    enum DirectionsForStep
-    {
+    enum DirectionsForStep {
         Up,
-        Left,
+        Right,
         Down,
-        Rigth
+        Left
     }
 }
